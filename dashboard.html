@@ -1,0 +1,111 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const teamName = localStorage.getItem("selectedTeam");
+            if (!teamName) {
+                window.location.href = "team-select.html";
+            }
+
+            document.getElementById("teamName").textContent = teamName;
+            document.getElementById("record").textContent = "0-0"; // Default record
+            document.getElementById("division").textContent = getTeamDivision(teamName);
+
+            const draftButton = document.getElementById("draftButton");
+            if (!localStorage.getItem("draftCompleted")) {
+                draftButton.style.display = "block";
+            } else {
+                draftButton.style.display = "none";
+            }
+        });
+
+        function getTeamDivision(team) {
+            const divisions = {
+                "AFC East": ["Buffalo Bills", "Miami Dolphins", "New England Patriots", "New York Jets"],
+                "AFC North": ["Baltimore Ravens", "Cincinnati Bengals", "Cleveland Browns", "Pittsburgh Steelers"],
+                "AFC South": ["Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars", "Tennessee Titans"],
+                "AFC West": ["Denver Broncos", "Kansas City Chiefs", "Las Vegas Raiders", "Los Angeles Chargers"],
+                "NFC East": ["Dallas Cowboys", "New York Giants", "Philadelphia Eagles", "Washington Commanders"],
+                "NFC North": ["Chicago Bears", "Detroit Lions", "Green Bay Packers", "Minnesota Vikings"],
+                "NFC South": ["Atlanta Falcons", "Carolina Panthers", "New Orleans Saints", "Tampa Bay Buccaneers"],
+                "NFC West": ["Arizona Cardinals", "Los Angeles Rams", "San Francisco 49ers", "Seattle Seahawks"]
+            };
+            
+            for (const [division, teams] of Object.entries(divisions)) {
+                if (teams.includes(team)) {
+                    return division;
+                }
+            }
+            return "Unknown Division";
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1, h2 {
+            margin: 10px 0;
+        }
+
+        .dashboard-container {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dashboard-button {
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            padding: 15px;
+            margin: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+            width: 80%;
+            text-align: center;
+        }
+
+        .dashboard-button:hover {
+            background-color: #005f73;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Team Dashboard</h1>
+        <h2 id="teamName"></h2>
+        <p><strong>Record:</strong> <span id="record"></span></p>
+        <p><strong>Division:</strong> <span id="division"></span></p>
+        <button class="dashboard-button" id="draftButton" onclick="location.href='draft.html'">Go to Draft</button>
+        <button class="dashboard-button" onclick="location.href='free-agents.html'">View Free Agents</button>
+        <button class="dashboard-button" onclick="location.href='team-select.html'">Change Team</button>
+        <button class="dashboard-button" onclick="location.href='roster.html'">Roster</button>
+    </div>
+</body>
+</html>

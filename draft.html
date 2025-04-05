@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft Players</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .draft-container {
+            height: 100vh;
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        #draftList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .player-card {
+            background-color: rgba(0, 0, 0, 0.381);
+            width: 180px;
+            height: 350px;
+            border-radius: 15px;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .player-face {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .star-rating {
+            color: gold;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .player-worth, .player-deal {
+            font-size: 0.9rem;
+            margin: 4px 0;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #0f0;
+        }
+
+        .assignment-buttons {
+            margin-top: 10px;
+        }
+
+        .assignment-buttons button {
+            margin: 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            background-color: transparent;
+            border: none;
+            color: white;
+        }
+
+        .assignment-buttons button:hover {
+            background-color: #008CBA;
+        }
+
+        .draft-button {
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .draft-button:hover {
+            background-color: #005f73;
+        }
+
+        #salaryBarContainer {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            width: 200px;
+            height: 20px;
+            background: #555;
+            border-radius: 10px;
+        }
+
+        #salaryBar {
+            height: 100%;
+            width: 0%;
+            background: yellow;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        #pickFormatDisplay {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="draft-container">
+        <h1>Draft Players</h1>
+        <h2 id="teamName"></h2>
+        <div id="salaryBarContainer">
+            <div id="salaryBar"></div>
+        </div>
+        <div id="draftList"></div>
+        <p class="message" id="draftMessage"></p>
+        <div id="pickFormatDisplay"></div>
+        <button class="draft-button" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDev = urlParams.get('dev') === 'true';
+
+        if (isDev) {
+            console.log("Developer Mode Active");
+            const devBanner = document.createElement("div");
+            devBanner.textContent = "Developer Mode Active";
+            devBanner.style.position = "fixed";
+            devBanner.style.top = "0";
+            devBanner.style.right = "0";
+            devBanner.style.background = "#ff0";
+            devBanner.style.color = "#000";
+            devBanner.style.padding = "5px 15px";
+            devBanner.style.fontWeight = "bold";
+            devBanner.style.zIndex = "9999";
+            document.body.appendChild(devBanner);
+            localStorage.setItem("draftCompleted", "false");
+            localStorage.setItem("draftPicksRemaining", 7);
+            localStorage.setItem("draftPickFormat", "1-3-3");
+        }
+
+        const lastNames = [
+            "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
+            "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin",
+            "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson",
+            // Add 370+ more as needed to reach 400 total...
+        ];
+
+        const positions = ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S", "K", "P"];
+        const playerImages = [
+            "assets/images/player.webp",
+            "assets/images/player2.webp",
+            "assets/images/player3.webp",
+            "assets/images/player4.webp",
+            "assets/images/player5.webp"
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const teamName = localStorage.getItem("selectedTeam");
+            if (!teamName) window.location.href = "team-select.html";
+            document.getElementById("teamName").textContent = teamName;
+
+            const firstDraft = isDev || localStorage.getItem("draftCompleted") !== "true";
+            let picksRemaining = parseInt(localStorage.getItem("draftPicksRemaining"));
+            if (isNaN(picksRemaining)) {
+                picksRemaining = firstDraft ? 7 : 3;
+                localStorage.setItem("draftPicksRemaining", picksRemaining);
+            }
+
+            updatePickFormatDisplay(picksRemaining);
+            renderPlayers(picksRemaining);
+            updateSalaryBar();
+        });
+
+        function generateDraftClass(count) {
+            const players = [];
+            for (let i = 0; i < count; i++) {
+                const name = lastNames[Math.floor(Math.random() * lastNames.length)];
+                const position = positions[Math.floor(Math.random() * positions.length)];
+                let stars = Math.floor(Math.random() * 5) + 1;
+
+                // Boost early picks
+                if (i < 2) stars = 4 + Math.floor(Math.random() * 2);
+
+                const worth = 1 + stars * 2 + Math.floor(Math.random() * 3); // Worth in millions
+                const dealYears = Math.floor(Math.random() * 3) + 1;
+
+                players.push({ name, position, stars, worth, dealYears });
+            }
+            return players;
+        }
+
+        function renderPlayers(count) {
+            const players = generateDraftClass(count);
+            const draftList = document.getElementById("draftList");
+            draftList.innerHTML = "";
+
+            players.forEach(player => {
+                const randomImage = playerImages[Math.floor(Math.random() * playerImages.length)];
+                const card = document.createElement("div");
+                card.className = "player-card";
+                card.innerHTML = `
+                    <img src="${randomImage}" class="player-face" alt="Player Face">
+                    <h3>${player.name}</h3>
+                    <p>${player.position}</p>
+                    <div class="star-rating">${'★'.repeat(player.stars)}${'☆'.repeat(5 - player.stars)}</div>
+                    <div class="player-worth">Worth: $${player.worth}M</div>
+                    <div class="player-deal">Deal: ${player.dealYears} yr${player.dealYears > 1 ? 's' : ''}</div>
+                    <div class="assignment-buttons">
+                        <button onclick='draftPlayer(${JSON.stringify(player)}, "starters")'>To Starters</button>
+                        <button onclick='draftPlayer(${JSON.stringify(player)}, "backups")'>To Backups</button>
+                        <button onclick='draftPlayer(${JSON.stringify(player)}, "third")'>To 3rd String</button>
+                    </div>
+                `;
+                draftList.appendChild(card);
+            });
+        }
+
+        function draftPlayer(player, destination) {
+            const drafted = JSON.parse(localStorage.getItem("draftedPlayers")) || [];
+            player.destination = destination;
+            drafted.push(player);
+            localStorage.setItem("draftedPlayers", JSON.stringify(drafted));
+
+            let picksRemaining = parseInt(localStorage.getItem("draftPicksRemaining")) - 1;
+            localStorage.setItem("draftPicksRemaining", picksRemaining);
+
+            const usedCap = parseInt(localStorage.getItem("usedCap")) || 0;
+            const newCap = usedCap + player.worth;
+            localStorage.setItem("usedCap", newCap);
+            updateSalaryBar();
+
+            const msg = document.getElementById("draftMessage");
+            msg.textContent = `${player.name} has been added to the ${destination}.`;
+            setTimeout(() => msg.textContent = "", 4500);
+
+            updatePickFormatDisplay(picksRemaining);
+
+            if (picksRemaining > 0) {
+                renderPlayers(picksRemaining);
+            } else {
+                localStorage.setItem("draftCompleted", "true");
+                setTimeout(() => window.location.href = "dashboard.html", 1500);
+            }
+        }
+
+        function updateSalaryBar() {
+            const used = parseInt(localStorage.getItem("usedCap")) || 0;
+            const totalCap = 150;
+            const percent = Math.min((used / totalCap) * 100, 100);
+            document.getElementById("salaryBar").style.width = percent + "%";
+        }
+
+        function updatePickFormatDisplay(picksLeft) {
+            const format = localStorage.getItem("draftPickFormat") || (picksLeft === 7 ? "1-3-3" : "1-1-1");
+            document.getElementById("pickFormatDisplay").textContent = `Picks Remaining: ${format}`;
+        }
+    </script>
+</body>
+</html>

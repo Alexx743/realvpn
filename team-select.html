@@ -1,0 +1,94 @@
+/* File Structure:
+- index.html (Game Introduction & Team Selection)
+- team-select.html (Select Your Team Page)
+- dashboard.html (Team Dashboard)
+- style.css (Styling for the game)
+- game.js (Handles game logic and local storage)
+- assets/ (For images and sounds)
+*/
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Team</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const teams = [
+                "Arizona Cardinals", "Atlanta Falcons", "Baltimore Ravens", "Buffalo Bills", "Carolina Panthers",
+                "Chicago Bears", "Cincinnati Bengals", "Cleveland Browns", "Dallas Cowboys", "Denver Broncos",
+                "Detroit Lions", "Green Bay Packers", "Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars",
+                "Kansas City Chiefs", "Las Vegas Raiders", "Los Angeles Chargers", "Los Angeles Rams", "Miami Dolphins",
+                "Minnesota Vikings", "New England Patriots", "New Orleans Saints", "New York Giants", "New York Jets",
+                "Philadelphia Eagles", "Pittsburgh Steelers", "San Francisco 49ers", "Seattle Seahawks",
+                "Tampa Bay Buccaneers", "Tennessee Titans", "Washington Commanders"
+            ];
+
+            const teamList = document.getElementById("teamList");
+
+            teams.forEach(team => {
+                let button = document.createElement("button");
+                button.textContent = team;
+                button.classList.add("team-button");
+                button.addEventListener("click", () => {
+                    localStorage.setItem("selectedTeam", team);
+                    window.location.href = "dashboard.html";
+                });
+                teamList.appendChild(button);
+            });
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .team-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            width: 90%;
+            max-width: 800px;
+            justify-content: center;
+        }
+
+        .team-button {
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .team-button:hover {
+            background-color: #005f73;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Your Team</h1>
+    <div class="team-container" id="teamList"></div>
+</body>
+</html>
